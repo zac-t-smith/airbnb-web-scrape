@@ -1,0 +1,35 @@
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
+# Create a new DataFrame
+column_names = ['Link', 'Title', 'Price', 'Rating', 'Details']
+df = pd.DataFrame(columns=column_names)
+
+# Get the page contents of the Airbnb page for New Orleans
+url = 'https://www.airbnb.com/s/New-Orleans--Louisiana--United-States/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&price_filter_input_type=0&price_filter_num_nights=5&query=New%20Orleans%2C%20LA&place_id=ChIJZYIRslSkIIYRtNMiXuhbBts&date_picker_type=calendar&checkin=2023-02-24&checkout=2023-02-25&source=structured_search_input_header&search_type=autocomplete_click'
+page = requests.get(url)
+soup = BeautifulSoup(page.text, 'lxml')
+
+# Find the listings on the page
+listings = soup.find_all('div', class_='_is5jnq')
+
+# Loop through all listings, extracting the relevant data
+for listing in listings:
+    link = listing.find('a', class_ = 'c18kleef dir dir-ltr').get('href')
+    title = listing.find('a', class_ = 'c18kleef dir dir-ltr').get_text()
+    price = listing.find('span', class_ = '_tyxjp1').get_text()
+    rating = listing.find('span' , class_ = 'r1dxllyb dir dir-ltr').get_text()
+    details = listing.find('div', class_ = 't6mzqp7 dir dir-ltr').get_text()
+    
+    # Extract links, titles, prices, ratings, and details from each listing
+    link = 'https://www.airbnb.com' + link
+    title = title.strip()
+    price = price.strip()
+    rating = rating.strip()
+    details = details.strip()
+    
+    # Append data to the DataFrame
+    df = df.append({'Link': link, 'Title': title, 'Price': price, 'Rating': rating, 'Details': details}, ignore_index=True)
+    
+df
